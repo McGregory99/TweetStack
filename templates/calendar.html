@@ -1,0 +1,914 @@
+{% extends "base.html" %} {% block title %}Calendario - TweetStack{% endblock %}
+{% block extra_css %}
+<style>
+    /* Calendar specific styles */
+    .calendar-container {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .calendar-header {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .calendar-nav-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+    }
+
+    .calendar-nav-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-weekday {
+        background: #f8fafc;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .calendar-day {
+        min-height: 120px;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .calendar-day:hover {
+        background-color: #f8fafc;
+    }
+
+    .calendar-day.empty {
+        background-color: #f1f5f9;
+        cursor: default;
+    }
+
+    .calendar-day.empty:hover {
+        background-color: #f1f5f9;
+    }
+
+    .day-number {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .day-content {
+        padding: 2rem 0.5rem 0.5rem;
+        height: 100%;
+    }
+
+    .tweet-indicator {
+        background: #3b82f6;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-bottom: 0.25rem;
+        display: inline-block;
+    }
+
+    .thread-indicator {
+        background: #8b5cf6;
+        color: white;
+        font-size: 0.6rem;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        margin-left: 0.25rem;
+    }
+
+    .collection-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .collection-tag-mini {
+        background: #dbeafe;
+        color: #1e40af;
+        font-size: 0.6rem;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+    }
+
+    /* Day details modal - Enhanced */
+    .day-details {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .day-details-content {
+        background: white;
+        border-radius: 1rem;
+        max-width: 900px;
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .day-details-header {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-radius: 1rem 1rem 0 0;
+    }
+
+    .day-header-info {
+        flex: 1;
+    }
+
+    .day-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .day-stats {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .stat-number {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .day-details-body {
+        padding: 2rem;
+    }
+
+    .day-tweet {
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .day-tweet:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .day-tweet:last-child {
+        margin-bottom: 0;
+    }
+
+    .tweet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .tweet-time-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tweet-time {
+        color: #1e293b;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .time-until {
+        color: #6b7280;
+        font-size: 0.75rem;
+        font-style: italic;
+    }
+
+    .tweet-type-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .badge-thread {
+        background: #f3e8ff;
+        color: #7c3aed;
+    }
+
+    .badge-single {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .badge-scheduled {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .tweet-content-section {
+        margin: 1rem 0;
+    }
+
+    .tweet-content {
+        color: #374151;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .thread-preview {
+        background: #f8f4ff;
+        border-left: 4px solid #8b5cf6;
+        padding: 1rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin: 1rem 0;
+    }
+
+    .thread-tweet-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .thread-tweet-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .thread-tweet-number {
+        color: #8b5cf6;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .content-stats {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .content-stat {
+        color: #6b7280;
+    }
+
+    .content-stat strong {
+        color: #1e293b;
+    }
+
+    .tweet-collections {
+        margin: 1rem 0;
+    }
+
+    .collection-tag {
+        background: #dbeafe;
+        color: #1e40af;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .tweet-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .action-btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        background: #2563eb;
+    }
+
+    .action-btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+
+    .action-btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    .action-btn-danger {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+
+    .action-btn-danger:hover {
+        background: #fecaca;
+    }
+
+    .no-tweets-message {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+
+    /* Stats bar */
+    .calendar-stats {
+        background: #f8fafc;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .calendar-day {
+            min-height: 80px;
+        }
+
+        .day-content {
+            padding: 1.5rem 0.25rem 0.25rem;
+        }
+
+        .calendar-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .day-details-content {
+            width: 98%;
+            max-height: 95vh;
+        }
+
+        .day-details-header {
+            padding: 1.5rem;
+        }
+
+        .day-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tweet-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">📅 Calendario de Tweets</h1>
+    <div class="flex gap-2">
+        <a href="/editor" class="btn btn-primary"> ➕ Programar Tweet </a>
+        <a href="/" class="btn btn-secondary"> ← Volver al inicio </a>
+    </div>
+</div>
+
+<!-- Calendar Container -->
+<div class="calendar-container">
+    <!-- Calendar Header -->
+    <div class="calendar-header">
+        <a
+            href="/calendar?year={{ prev_month.year }}&month={{ prev_month.month }}"
+            class="calendar-nav-btn"
+        >
+            ← Anterior
+        </a>
+
+        <h2 class="text-xl font-bold">{{ month_name }} {{ current_year }}</h2>
+
+        <a
+            href="/calendar?year={{ next_month.year }}&month={{ next_month.month }}"
+            class="calendar-nav-btn"
+        >
+            Siguiente →
+        </a>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="calendar-stats">
+        <div class="text-sm text-gray-600">
+            📊 <strong>{{ total_scheduled }}</strong> tweets programados en {{
+            month_name }}
+        </div>
+
+        <div class="flex gap-4 text-xs">
+            <div class="flex items-center gap-1">
+                <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                <span>Tweets</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-3 h-3 bg-purple-500 rounded"></div>
+                <span>Hilos</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div
+                    class="w-3 h-3 bg-blue-100 border border-blue-400 rounded"
+                ></div>
+                <span>Colecciones</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-grid">
+        <!-- Weekday headers -->
+        <div class="calendar-weekday">Lun</div>
+        <div class="calendar-weekday">Mar</div>
+        <div class="calendar-weekday">Mié</div>
+        <div class="calendar-weekday">Jue</div>
+        <div class="calendar-weekday">Vie</div>
+        <div class="calendar-weekday">Sáb</div>
+        <div class="calendar-weekday">Dom</div>
+
+        <!-- Calendar days -->
+        {% for week in calendar_days %} {% for day_data in week %} {% if
+        day_data %}
+        <div
+            class="calendar-day"
+            data-date="{{ day_data.date }}"
+            data-has-tweets="{{ 'true' if day_data.tweet_count > 0 else 'false' }}"
+            onclick="showDayDetailsFromElement(this)"
+        >
+            <div class="day-number">{{ day_data.day }}</div>
+            <div class="day-content">
+                {% if day_data.tweet_count > 0 %}
+                <div class="tweet-indicator">
+                    {{ day_data.tweet_count }} tweet{{ 's' if
+                    day_data.tweet_count != 1 }} {% if day_data.has_threads %}
+                    <span class="thread-indicator">🧵</span>
+                    {% endif %}
+                </div>
+
+                {% if day_data.collections %}
+                <div class="collection-tags">
+                    {% for collection in day_data.collections[:2] %}
+                    <span class="collection-tag-mini">{{ collection }}</span>
+                    {% endfor %} {% if day_data.collections|length > 2 %}
+                    <span class="collection-tag-mini"
+                        >+{{ day_data.collections|length - 2 }}</span
+                    >
+                    {% endif %}
+                </div>
+                {% endif %} {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="calendar-day empty"></div>
+        {% endif %} {% endfor %} {% endfor %}
+    </div>
+</div>
+
+<!-- Enhanced Day Details Modal -->
+<div id="dayDetailsModal" class="day-details">
+    <div class="day-details-content">
+        <div class="day-details-header">
+            <div class="day-header-info">
+                <h3 id="dayDetailsTitle" class="day-title"></h3>
+                <div id="dayStatsContainer" class="day-stats">
+                    <!-- Dynamic stats will be populated here -->
+                </div>
+            </div>
+            <button
+                onclick="closeDayDetails()"
+                class="btn btn-secondary btn-sm"
+            >
+                ✕ Cerrar
+            </button>
+        </div>
+
+        <div class="day-details-body">
+            <div id="dayDetailsContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if total_scheduled == 0 %}
+<!-- Empty state for first-time users -->
+<div class="mt-8">
+    <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <h3 class="empty-state-title">No tienes tweets programados</h3>
+        <p class="empty-state-description">
+            Usa el calendario para planificar y visualizar tu contenido futuro.
+            Programa tweets para días específicos y mantén una estrategia de
+            contenido organizada.
+        </p>
+        <a href="/editor" class="btn btn-primary">
+            📝 Programar mi primer tweet
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick tips -->
+<div class="mt-8">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">💡 Consejos para el calendario</h3>
+        </div>
+        <div class="card-content">
+            <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
+            >
+                <div>
+                    <h4 class="font-medium text-gray-800 mb-2">
+                        📋 Planificación
+                    </h4>
+                    <ul class="space-y-1">
+                        <li>• Programa contenido con anticipación</li>
+                        <li>• Distribuye tweets a lo largo del día</li>
+                        <li>• Mantén consistencia en la frecuencia</li>
+                        <li>• Balancea diferentes tipos de contenido</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-gray-800 mb-2">
+                        🎯 Organización
+                    </h4>
+                    <ul class="space-y-1">
+                        <li>• Usa colecciones para agrupar por tema</li>
+                        <li>• Los hilos son ideales para contenido largo</li>
+                        <li>• Haz clic en cualquier día para ver detalles</li>
+                        <li>• Navega entre meses fácilmente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+    // Simple debugging version
+    function showDayDetailsFromElement(element) {
+        console.log("=== DEBUG: Click detected ===");
+        console.log("Element:", element);
+
+        try {
+            const dateStr = element.dataset.date;
+            const hasTweets = element.dataset.hasTweets === "true";
+
+            console.log("Date:", dateStr);
+            console.log("Has tweets:", hasTweets);
+
+            if (!hasTweets) {
+                console.log("No tweets data - showing empty state");
+                showEmptyDayModal(dateStr);
+                return;
+            }
+
+            // Success - fetch tweets
+            fetchTweetsForDay(dateStr);
+        } catch (error) {
+            console.error("=== ERROR in showDayDetailsFromElement ===");
+            console.error("Error:", error);
+            console.error("Stack:", error.stack);
+            alert("Error inesperado: " + error.message);
+        }
+    }
+
+    function showEmptyDayModal(dateStr) {
+        const modal = document.getElementById("dayDetailsModal");
+        const title = document.getElementById("dayDetailsTitle");
+        const content = document.getElementById("dayDetailsContent");
+        const statsContainer = document.getElementById("dayStatsContainer");
+
+        if (!modal || !title || !content || !statsContainer) {
+            console.error("Modal elements not found");
+            return;
+        }
+
+        // Format date
+        const date = new Date(dateStr + "T00:00:00");
+        const formattedDate = date.toLocaleDateString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+
+        title.textContent = formattedDate;
+
+        statsContainer.innerHTML = "";
+
+        content.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                <h3 style="color: #666; margin-bottom: 1rem;">Día libre</h3>
+                <p style="color: #888;">No tienes tweets programados para esta fecha.</p>
+            </div>
+        `;
+
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function fetchTweetsForDay(dateStr) {
+        console.log("=== Fetching tweets for day ===");
+        console.log("Date:", dateStr);
+
+        fetch("/api/tweets/day?date=" + dateStr)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Tweets data received:", data);
+                if (data.tweets && data.tweets.length > 0) {
+                    showSimpleDayDetails(dateStr, data.tweets);
+                } else {
+                    console.log("Empty tweets array");
+                    showEmptyDayModal(dateStr);
+                }
+            })
+            .catch((error) => {
+                console.error("=== ERROR in fetchTweetsForDay ===");
+                console.error("Error:", error);
+                console.error("Stack:", error.stack);
+                alert("Error: No se pudieron cargar los tweets del día");
+            });
+    }
+
+    function showSimpleDayDetails(dateStr, tweets) {
+        console.log("=== Showing day details ===");
+        console.log("Date:", dateStr);
+        console.log("Tweets:", tweets);
+
+        const modal = document.getElementById("dayDetailsModal");
+        const title = document.getElementById("dayDetailsTitle");
+        const content = document.getElementById("dayDetailsContent");
+        const statsContainer = document.getElementById("dayStatsContainer");
+
+        if (!modal || !title || !content || !statsContainer) {
+            console.error("Modal elements not found");
+            alert("Error: Elementos del modal no encontrados");
+            return;
+        }
+
+        // Format date
+        const date = new Date(dateStr + "T00:00:00");
+        const formattedDate = date.toLocaleDateString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+
+        title.textContent = formattedDate;
+
+        statsContainer.innerHTML = "";
+
+        // Generate content with individual character counts
+        let html = "";
+        tweets.forEach((tweet, index) => {
+            const time = tweet.scheduled_date
+                ? new Date(tweet.scheduled_date).toLocaleTimeString("es-ES", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                  })
+                : "Sin hora";
+
+            // Calculate individual tweet character count
+            let tweetChars = 0;
+            let tweetCount = 1;
+
+            if (tweet.is_thread && tweet.thread_tweets) {
+                tweetChars = tweet.thread_tweets.reduce(
+                    (sum, t) => sum + (t.content || "").length,
+                    0
+                );
+                tweetCount = tweet.thread_tweets.length;
+            } else {
+                tweetChars = (tweet.content || "").length;
+            }
+
+            const avgCharsThisTweet = Math.round(tweetChars / tweetCount);
+
+            html +=
+                '<div class="day-tweet" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">';
+            html +=
+                '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">';
+            html += '<div style="font-weight: 600; color: #1e293b;">🕐 ' + time;
+
+            if (tweet.is_thread) {
+                html += " - 🧵 Hilo (" + tweetCount + " tweets)";
+            } else {
+                html += " - 📝 Tweet simple";
+            }
+
+            html += "</div>";
+
+            // Character count badge
+            html +=
+                '<div style="background: #f1f5f9; color: #475569; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">';
+            html += tweetChars + " caracteres";
+            if (tweet.is_thread) {
+                html += " (" + avgCharsThisTweet + "/tweet)";
+            }
+            html += "</div>";
+            html += "</div>";
+
+            if (
+                tweet.is_thread &&
+                tweet.thread_tweets &&
+                tweet.thread_tweets.length > 0
+            ) {
+                html +=
+                    '<div style="background: #f8f4ff; padding: 0.75rem; border-radius: 0.25rem; border-left: 4px solid #8b5cf6;">';
+                html +=
+                    '<div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.5rem;">Hilo de ' +
+                    tweet.thread_tweets.length +
+                    " tweets:</div>";
+                tweet.thread_tweets.forEach((t, i) => {
+                    const threadTweetChars = (t.content || "").length;
+                    html +=
+                        '<div style="margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 0.25rem;">';
+                    html +=
+                        '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">';
+                    html +=
+                        '<strong style="color: #8b5cf6; font-size: 0.875rem;">Tweet ' +
+                        (i + 1) +
+                        ":</strong>";
+                    html +=
+                        '<span style="color: #6b7280; font-size: 0.75rem;">' +
+                        threadTweetChars +
+                        " chars</span>";
+                    html += "</div>";
+                    html +=
+                        '<div style="color: #374151;">' +
+                        (t.content || "").substring(0, 120);
+                    if ((t.content || "").length > 120) html += "...";
+                    html += "</div>";
+                    html += "</div>";
+                });
+                html += "</div>";
+            } else {
+                const content = (tweet.content || "").substring(0, 200);
+                html +=
+                    '<div style="color: #374151; margin-bottom: 0.5rem;">' +
+                    content;
+                if ((tweet.content || "").length > 200) html += "...";
+                html += "</div>";
+            }
+
+            if (tweet.collections && tweet.collections.length > 0) {
+                html += '<div style="margin-top: 0.5rem;">';
+                tweet.collections.forEach((c) => {
+                    html +=
+                        '<span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-right: 0.5rem;">📁 ' +
+                        (c.name || "") +
+                        "</span>";
+                });
+                html += "</div>";
+            }
+
+            html +=
+                '<div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">';
+            html +=
+                '<a href="/editor?tweet_id=' +
+                tweet.id +
+                '" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem;">✏️ Editar</a>';
+            html +=
+                '<button onclick="deleteTweetSimple(' +
+                tweet.id +
+                ')" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; font-size: 0.875rem; cursor: pointer;">🗑️ Eliminar</button>';
+            html += "</div>";
+
+            html += "</div>";
+        });
+
+        content.innerHTML = html;
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+
+        console.log("Modal should be visible now");
+    }
+
+    function deleteTweetSimple(tweetId) {
+        if (confirm("¿Eliminar este tweet?")) {
+            fetch("/api/tweets/" + tweetId, { method: "DELETE" })
+                .then(() => location.reload())
+                .catch((error) => alert("Error: " + error.message));
+        }
+    }
+
+    function closeDayDetails() {
+        const modal = document.getElementById("dayDetailsModal");
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "";
+        }
+    }
+
+    // Event listeners
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("=== Calendar JavaScript loaded ===");
+
+        // Close modal when clicking outside
+        const modal = document.getElementById("dayDetailsModal");
+        if (modal) {
+            modal.addEventListener("click", function (e) {
+                if (e.target === this) {
+                    closeDayDetails();
+                }
+            });
+        } else {
+            console.error("Modal not found during setup");
+        }
+
+        // Close modal with Escape key
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                closeDayDetails();
+            }
+        });
+
+        // Test if day elements are present
+        const dayElements = document.querySelectorAll(
+            ".calendar-day[data-date]"
+        );
+        console.log("Found " + dayElements.length + " clickable day elements");
+    });
+</script>
+{% endblock %}

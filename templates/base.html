@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            {% block title %}TweetStack - Organiza tus tweets{% endblock %}
+        </title>
+
+        <!-- CSS -->
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', path='css/main.css') }}"
+        />
+
+        <!-- Additional CSS for notifications -->
+        <style>
+            .message {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                color: white;
+                font-weight: 500;
+                z-index: 2000;
+                max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: slideIn 0.3s ease;
+            }
+
+            .message-success {
+                background-color: #10b981;
+            }
+
+            .message-error {
+                background-color: #ef4444;
+            }
+
+            .message-info {
+                background-color: #3b82f6;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        </style>
+
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <a href="/" class="logo">📱 TweetStack</a>
+
+                    <nav class="nav">
+                        <a
+                            href="/"
+                            class="nav-link {% if request.url.path == '/' %}active{% endif %}"
+                        >
+                            🏠 Inicio
+                        </a>
+                        <a
+                            href="/calendar"
+                            class="nav-link {% if request.url.path == '/calendar' %}active{% endif %}"
+                        >
+                            📅 Calendario
+                        </a>
+                        <a
+                            href="/collections"
+                            class="nav-link {% if request.url.path == '/collections' %}active{% endif %}"
+                        >
+                            📁 Colecciones
+                        </a>
+                        <a href="/editor" class="btn btn-primary">
+                            ✏️ Nuevo Tweet
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container">{% block content %}{% endblock %}</main>
+
+        <!-- Footer -->
+        <footer
+            style="
+                margin-top: 4rem;
+                padding: 2rem 0;
+                border-top: 1px solid #e2e8f0;
+                text-align: center;
+                color: #64748b;
+            "
+        >
+            <div class="container">
+                <p>
+                    &copy; 2024 TweetStack - Organiza tus tweets de manera
+                    eficiente
+                </p>
+            </div>
+        </footer>
+
+        <!-- JavaScript -->
+        <script src="{{ url_for('static', path='js/main.js') }}"></script>
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

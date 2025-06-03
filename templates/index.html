@@ -1,0 +1,178 @@
+{% extends "base.html" %} {% block title %}Inicio - TweetStack{% endblock %} {%
+block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Mis Tweets</h1>
+    <div class="flex gap-2">
+        <a href="/editor" class="btn btn-primary"> ➕ Nuevo Tweet </a>
+        <a href="/collections" class="btn btn-secondary">
+            📁 Gestionar Colecciones
+        </a>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="card">
+        <div class="card-content">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600">
+                    {{ tweets|length }}
+                </div>
+                <div class="text-sm text-gray-600">Total de Tweets</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-content">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">
+                    {{ collections|length }}
+                </div>
+                <div class="text-sm text-gray-600">Colecciones</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-content">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600">
+                    {{ tweets|selectattr('is_thread')|list|length }}
+                </div>
+                <div class="text-sm text-gray-600">Hilos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Tweets -->
+{% if tweets %}
+<div class="grid grid-cols-1 gap-4">
+    {% for tweet in tweets %}
+    <div class="card tweet-card">
+        <div class="card-content">
+            <!-- Header del tweet -->
+            <div class="tweet-header">
+                <div class="tweet-meta">
+                    {% if tweet.is_thread %}
+                    <span
+                        class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium"
+                    >
+                        🧵 Hilo ({{ tweet.thread_tweets|length }} tweets)
+                    </span>
+                    {% endif %} {% if tweet.scheduled_date %}
+                    <span
+                        class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium"
+                    >
+                        ⏰ Programado
+                    </span>
+                    {% endif %}
+                    <span class="text-gray-500">
+                        📅 {{ tweet.created_at[:19]|replace('T', ' ') }}
+                    </span>
+                </div>
+
+                <div class="tweet-actions">
+                    <a
+                        href="/editor?tweet_id={{ tweet.id }}"
+                        class="btn btn-secondary btn-sm"
+                    >
+                        ✏️ Editar
+                    </a>
+                    <button
+                        onclick="deleteTweetAction({{ tweet.id }})"
+                        class="btn btn-danger btn-sm"
+                    >
+                        🗑️ Eliminar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido del tweet -->
+            {% if tweet.is_thread %}
+            <!-- Mostrar hilos -->
+            <div class="space-y-3">
+                {% for thread_tweet in tweet.thread_tweets %}
+                <div class="border-l-4 border-purple-400 pl-4">
+                    <div class="text-sm text-gray-600 mb-1">
+                        Tweet {{ loop.index }}
+                    </div>
+                    <div class="tweet-content">{{ thread_tweet.content }}</div>
+                    {% if thread_tweet.media_path %}
+                    <div class="text-xs text-gray-500 mt-2">
+                        📎 {{ thread_tweet.media_path }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Tweet simple -->
+            <div class="tweet-content">{{ tweet.content }}</div>
+            {% if tweet.media_path %}
+            <div class="text-xs text-gray-500 mt-2">
+                📎 {{ tweet.media_path }}
+            </div>
+            {% endif %} {% endif %}
+
+            <!-- Fecha programada -->
+            {% if tweet.scheduled_date %}
+            <div class="mt-3 p-2 bg-orange-50 border border-orange-200 rounded">
+                <div class="text-sm text-orange-800">
+                    ⏰ Programado para: {{
+                    tweet.scheduled_date[:19]|replace('T', ' ') }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Colecciones -->
+            {% if tweet.collections %}
+            <div class="tweet-collections">
+                {% for collection in tweet.collections %}
+                <span class="collection-tag"> 📁 {{ collection.name }} </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- Estado vacío -->
+<div class="empty-state">
+    <div class="empty-state-icon">📝</div>
+    <h3 class="empty-state-title">No tienes tweets aún</h3>
+    <p class="empty-state-description">
+        Comienza creando tu primer tweet o hilo para organizar tu contenido.
+    </p>
+    <a href="/editor" class="btn btn-primary"> ✏️ Crear mi primer tweet </a>
+</div>
+{% endif %}
+
+<!-- Quick Stats -->
+{% if collections %}
+<div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Resumen de Colecciones</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for collection in collections %}
+        <div class="card">
+            <div class="card-content">
+                <h3 class="font-medium text-gray-900">{{ collection.name }}</h3>
+                {% if collection.description %}
+                <p class="text-sm text-gray-600 mt-1">
+                    {{ collection.description }}
+                </p>
+                {% endif %}
+                <div class="mt-2 text-sm text-gray-500">
+                    {{ collection.tweet_count }} tweets
+                </div>
+                <a href="/collections" class="btn btn-secondary btn-sm mt-2">
+                    Ver colección →
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %} {% endblock %}

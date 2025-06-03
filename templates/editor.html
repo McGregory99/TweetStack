@@ -1,0 +1,344 @@
+{% extends "base.html" %} {% block title %}Editor de Tweets - TweetStack{%
+endblock %} {% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">
+        {% if tweet %}Editar Tweet{% else %}Nuevo Tweet{% endif %}
+    </h1>
+    <a href="/" class="btn btn-secondary"> ← Volver al inicio </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Editor principal -->
+    <div class="lg:col-span-2">
+        <form id="tweetForm" class="card">
+            <div class="card-content">
+                <!-- Toggle para hilo -->
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input
+                            type="checkbox"
+                            id="threadToggle"
+                            class="checkbox"
+                            {%
+                            if
+                            tweet
+                            and
+                            tweet.is_thread
+                            %}checked{%
+                            endif
+                            %}
+                        />
+                        <label for="threadToggle" class="label">
+                            🧵 Crear como hilo de tweets
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tweet simple -->
+                <div
+                    id="singleTweetContainer"
+                    {%
+                    if
+                    tweet
+                    and
+                    tweet.is_thread
+                    %}style="display: none;"
+                    {%
+                    endif
+                    %}
+                >
+                    <div class="form-group">
+                        <label for="content" class="label"
+                            >Contenido del Tweet</label
+                        >
+                        <textarea
+                            id="content"
+                            name="content"
+                            class="textarea"
+                            placeholder="¿Qué está pasando?"
+                            maxlength="280"
+                        >
+{% if tweet and not tweet.is_thread %}{{ tweet.content }}{% endif %}</textarea
+                        >
+                        <div class="text-xs text-gray-500 text-right mt-1">
+                            <span id="charCount">0</span>/280
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="media_path" class="label"
+                            >Archivo multimedia (opcional)</label
+                        >
+                        <input
+                            type="text"
+                            id="media_path"
+                            name="media_path"
+                            class="input"
+                            placeholder="Ruta del archivo o URL"
+                            value="{% if tweet and not tweet.is_thread %}{{ tweet.media_path }}{% endif %}"
+                        />
+                    </div>
+                </div>
+
+                <!-- Container para hilos -->
+                <div
+                    id="threadContainer"
+                    {%
+                    if
+                    not
+                    tweet
+                    or
+                    not
+                    tweet.is_thread
+                    %}style="display: none;"
+                    {%
+                    endif
+                    %}
+                >
+                    <div class="form-group">
+                        <label class="label">Tweets del hilo</label>
+                        <div id="threadTweetsContainer">
+                            <!-- Los tweets del hilo se generan dinámicamente -->
+                        </div>
+                        <button
+                            type="button"
+                            id="addThreadTweet"
+                            class="btn btn-secondary mt-2"
+                            style="display: none"
+                        >
+                            ➕ Agregar tweet al hilo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fecha programada -->
+                <div class="form-group">
+                    <label for="scheduled_date" class="label"
+                        >Programar para más tarde (opcional)</label
+                    >
+                    <input
+                        type="datetime-local"
+                        id="scheduled_date"
+                        name="scheduled_date"
+                        class="input"
+                        value="{% if tweet and tweet.scheduled_date %}{{ tweet.scheduled_date[:16] }}{% endif %}"
+                    />
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex gap-2 mt-6">
+                    <button
+                        type="button"
+                        id="saveTweet"
+                        class="btn btn-primary"
+                    >
+                        {% if tweet %}💾 Actualizar Tweet{% else %}📝 Guardar
+                        Tweet{% endif %}
+                    </button>
+                    <a href="/" class="btn btn-secondary"> ❌ Cancelar </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar con colecciones -->
+    <div class="lg:col-span-1">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📁 Colecciones</h3>
+            </div>
+            <div class="card-content">
+                {% if collections %}
+                <p class="text-sm text-gray-600 mb-4">
+                    Selecciona las colecciones donde quieres guardar este tweet:
+                </p>
+
+                {% for collection in collections %}
+                <div class="checkbox-group">
+                    <input
+                        type="checkbox"
+                        id="collection_{{ collection.id }}"
+                        name="collections"
+                        value="{{ collection.id }}"
+                        class="checkbox"
+                        {%
+                        if
+                        tweet
+                        and
+                        collection.id
+                        in
+                        tweet.collections|map(attribute="id"
+                        )|list
+                        %}checked{%
+                        endif
+                        %}
+                    />
+                    <label for="collection_{{ collection.id }}" class="text-sm">
+                        <strong>{{ collection.name }}</strong>
+                        {% if collection.description %}
+                        <br />
+                        <span class="text-xs text-gray-500"
+                            >{{ collection.description }}</span
+                        >
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %} {% else %}
+                <p class="text-sm text-gray-500 mb-4">
+                    No tienes colecciones aún.
+                </p>
+                <a href="/collections" class="btn btn-secondary btn-sm">
+                    ➕ Crear primera colección
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Consejos -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">💡 Consejos</h3>
+            </div>
+            <div class="card-content">
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li>• Los tweets tienen un límite de 280 caracteres</li>
+                    <li>• Los hilos te permiten contar historias más largas</li>
+                    <li>
+                        • Puedes programar tweets para publicarlos más tarde
+                    </li>
+                    <li>
+                        • Las colecciones te ayudan a organizar tu contenido
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block extra_js %}
+<!-- Pass tweet data to JavaScript safely -->
+<script>
+    window.editorData = {
+        hasTweet: {% if tweet %}true{% else %}false{% endif %},
+        tweetData: {% if tweet %}{{ tweet|tojson|safe }}{% else %}null{% endif %}
+    };
+</script>
+
+<script>
+    // Handle URL parameters for pre-filled data
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Handle scheduled_date parameter
+        const scheduledDate = urlParams.get("scheduled_date");
+        if (scheduledDate) {
+            const dateInput = document.getElementById("scheduled_date");
+            if (dateInput) {
+                // Convert to datetime-local format if needed
+                const formattedDate = scheduledDate.includes("T")
+                    ? scheduledDate.substring(0, 16)
+                    : scheduledDate + "T12:00";
+                dateInput.value = formattedDate;
+
+                // Show a helpful message
+                showNotification(
+                    "Fecha preseleccionada: " +
+                        new Date(formattedDate).toLocaleString("es-ES"),
+                    "info"
+                );
+            }
+        }
+
+        // Handle is_thread parameter
+        const isThread = urlParams.get("is_thread");
+        if (isThread === "true") {
+            const threadToggle = document.getElementById("threadToggle");
+            if (threadToggle && !threadToggle.checked) {
+                threadToggle.checked = true;
+                if (window.tweetEditor) {
+                    window.tweetEditor.toggleThread(true);
+                }
+                showNotification("Modo hilo activado", "info");
+            }
+        }
+
+        // Handle duplicate parameter
+        const duplicateId = urlParams.get("duplicate");
+        if (duplicateId) {
+            showNotification(
+                "Duplicando tweet... Los datos se cargarán automáticamente",
+                "info"
+            );
+        }
+    });
+
+    // Initialize tweet data if editing
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.editorData.hasTweet && window.editorData.tweetData) {
+            const tweetData = window.editorData.tweetData;
+
+            if (tweetData.is_thread && tweetData.thread_tweets) {
+                // Initialize thread editor with existing data
+                window.tweetEditor.isThread = true;
+                window.tweetEditor.threadTweets = tweetData.thread_tweets;
+                window.tweetEditor.toggleThread(true);
+                window.tweetEditor.renderThreadTweets();
+
+                // Check the thread toggle
+                document.getElementById("threadToggle").checked = true;
+            } else {
+                // Initialize single tweet editor
+                const contentTextarea = document.getElementById("content");
+                if (contentTextarea && tweetData.content) {
+                    contentTextarea.value = tweetData.content;
+                    updateCharCount();
+                }
+            }
+        }
+    });
+
+    // Show notification helper function
+    function showNotification(message, type = "info") {
+        const notification = document.createElement("div");
+        notification.className = `message message-${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 4000);
+    }
+
+    // Character counter for single tweet
+    function updateCharCount() {
+        const textarea = document.getElementById("content");
+        const counter = document.getElementById("charCount");
+        if (textarea && counter) {
+            const count = textarea.value.length;
+            counter.textContent = count;
+
+            // Change color based on character limit
+            if (count > 280) {
+                counter.style.color = "#ef4444"; // red
+            } else if (count > 250) {
+                counter.style.color = "#f59e0b"; // yellow
+            } else {
+                counter.style.color = "#6b7280"; // gray
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const textarea = document.getElementById("content");
+        if (textarea) {
+            textarea.addEventListener("input", updateCharCount);
+            updateCharCount(); // Initial count
+        }
+
+        // Focus on content textarea if creating new tweet
+        if (!window.editorData.hasTweet && textarea && !textarea.value.trim()) {
+            textarea.focus();
+        }
+    });
+</script>
+{% endblock %}
