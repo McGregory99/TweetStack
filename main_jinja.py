@@ -1,3 +1,17 @@
+"""
+TweetStack - Development Version
+================================
+
+Main application file for TweetStack development environment.
+Features:
+- FastAPI backend with Jinja2 templates
+- SQLite database for local development
+- Demo user authentication
+- Full web interface + API endpoints
+
+To run: python main_jinja.py
+"""
+
 from fastapi import FastAPI, HTTPException, Depends, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -15,14 +29,25 @@ import calendar
 import json
 import os
 
-# Configuración de la base de datos
+# =============================================================================
+# DEVELOPMENT CONFIGURATION
+# =============================================================================
+
+# Database configuration for development
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./tweetstack.db")
+
+# Demo user ID for development
+DEMO_USER_ID = "demo-user-123"
+
+print("🚀 Starting TweetStack Development Server")
+print(f"📁 Database: {DATABASE_URL}")
+print(f"👤 Demo User: {DEMO_USER_ID}")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Tabla de asociación para la relación many-to-many entre tweets y colecciones
+# Association table for many-to-many relationship between tweets and collections
 tweet_collections = Table(
     'tweet_collections',
     Base.metadata,
@@ -30,7 +55,7 @@ tweet_collections = Table(
     Column('collection_id', Integer, ForeignKey('collections.id'))
 )
 
-# Modelos de base de datos
+# Database models
 class Tweet(Base):
     __tablename__ = "tweets"
     
@@ -141,23 +166,27 @@ class CollectionResponse(BaseModel):
     tweet_count: int
     created_at: datetime
 
-# Crear la aplicación FastAPI
-app = FastAPI(title="TweetStack - Jinja2 Version", version="2.0.0")
+# Create FastAPI application
+app = FastAPI(
+    title="TweetStack - Development Version", 
+    version="1.0.0",
+    description="Social media content organizer for development"
+)
 
-# Configurar archivos estáticos y templates
+# Configure static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# CORS (mantenemos para API endpoints)
+# CORS (configured for development)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Permissive for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dependencia para obtener la sesión de base de datos
+# Dependency to get database session
 def get_db():
     db = SessionLocal()
     try:
@@ -165,7 +194,7 @@ def get_db():
     finally:
         db.close()
 
-# Funciones auxiliares
+# Helper functions
 def format_tweet_response(tweet: Tweet, db: Session) -> dict:
     thread_tweets = []
     if tweet.thread_tweets_json:
@@ -202,12 +231,12 @@ def format_collection_response(collection: Collection, db: Session) -> dict:
         "created_at": collection.created_at.isoformat()
     }
 
-# RUTAS HTML (Jinja2 Templates)
+# HTML ROUTES (Jinja2 Templates)
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
-    """Página principal con todos los tweets"""
-    user_id = "demo-user-123"  # En producción esto vendría de autenticación
+    """Main page with all tweets"""
+    user_id = DEMO_USER_ID  # Using demo user for development
     
     tweets = db.query(Tweet).filter(Tweet.user_id == user_id).order_by(Tweet.created_at.desc()).all()
     collections = db.query(Collection).filter(Collection.user_id == user_id).order_by(Collection.name).all()
@@ -224,8 +253,8 @@ def home(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/editor", response_class=HTMLResponse)
 def tweet_editor(request: Request, tweet_id: Optional[int] = None, db: Session = Depends(get_db)):
-    """Editor de tweets"""
-    user_id = "demo-user-123"
+    """Tweet editor"""
+    user_id = DEMO_USER_ID
     
     tweet_data = None
     if tweet_id:
@@ -245,8 +274,8 @@ def tweet_editor(request: Request, tweet_id: Optional[int] = None, db: Session =
 
 @app.get("/collections", response_class=HTMLResponse)
 def collections_page(request: Request, db: Session = Depends(get_db)):
-    """Página de gestión de colecciones"""
-    user_id = "demo-user-123"
+    """Collections management page"""
+    user_id = DEMO_USER_ID
     
     collections = db.query(Collection).filter(Collection.user_id == user_id).order_by(Collection.name).all()
     collections_data = [format_collection_response(collection, db) for collection in collections]
@@ -259,8 +288,8 @@ def collections_page(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/calendar", response_class=HTMLResponse)
 def calendar_view(request: Request, year: Optional[int] = None, month: Optional[int] = None, db: Session = Depends(get_db)):
-    """Vista de calendario con tweets programados"""
-    user_id = "demo-user-123"
+    """Calendar view with scheduled tweets"""
+    user_id = DEMO_USER_ID
     
     # Use current date if not specified
     now = datetime.now()
@@ -332,10 +361,10 @@ def calendar_view(request: Request, year: Optional[int] = None, month: Optional[
         "user_id": user_id
     })
 
-# RUTAS API (mantener funcionalidad AJAX)
+# API ROUTES (maintain AJAX functionality)
 
 @app.get("/api/tweets/day")
-def get_tweets_by_day(date: str, user_id: str = "demo-user-123", db: Session = Depends(get_db)):
+def get_tweets_by_day(date: str, user_id: str = DEMO_USER_ID, db: Session = Depends(get_db)):
     """Get tweets for a specific day"""
     try:
         # Parse the date string
@@ -462,11 +491,13 @@ def delete_collection(collection_id: int, db: Session = Depends(get_db)):
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "message": "TweetStack Jinja2 Version is running"}
+    return {"status": "healthy", "message": "TweetStack Development Server is running"}
 
-# Crear tablas
+# Create tables
 Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     import uvicorn
+    print("🌟 Starting TweetStack Development Server on http://localhost:8000")
+    print("📱 Open your browser and navigate to http://localhost:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000) 
