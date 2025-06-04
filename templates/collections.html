@@ -1,20 +1,20 @@
-{% extends "base.html" %} {% block title %}Colecciones - TweetStack{% endblock
+{% extends "base.html" %} {% block title %}Collections - TweetStack{% endblock
 %} {% block content %}
 <div class="collections-page">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">📁 Mis Colecciones</h1>
+        <h1 class="text-2xl font-bold">📁 My Collections</h1>
         <div class="flex gap-2">
             <button
                 onclick="openModal('createCollectionModal')"
                 class="btn btn-primary"
             >
-                ➕ Nueva Colección
+                ➕ New Collection
             </button>
-            <a href="/" class="btn btn-secondary"> ← Volver al inicio </a>
+            <a href="/" class="btn btn-secondary"> ← Back to home </a>
         </div>
     </div>
 
-    <!-- Estadísticas -->
+    <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="card">
             <div class="card-content">
@@ -22,9 +22,7 @@
                     <div class="text-2xl font-bold text-green-600">
                         {{ collections|length }}
                     </div>
-                    <div class="text-sm text-gray-600">
-                        Total de Colecciones
-                    </div>
+                    <div class="text-sm text-gray-600">Total Collections</div>
                 </div>
             </div>
         </div>
@@ -35,13 +33,13 @@
                     <div class="text-2xl font-bold text-blue-600">
                         {{ collections|sum(attribute='tweet_count') }}
                     </div>
-                    <div class="text-sm text-gray-600">Tweets Organizados</div>
+                    <div class="text-sm text-gray-600">Organized Tweets</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Lista de colecciones -->
+    <!-- Collections list -->
     {% if collections %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for collection in collections %}
@@ -75,7 +73,7 @@
                         href="/?collection={{ collection.id }}"
                         class="btn btn-secondary btn-sm"
                     >
-                        👁️ Ver tweets
+                        👁️ View tweets
                     </a>
                 </div>
             </div>
@@ -83,29 +81,29 @@
         {% endfor %}
     </div>
     {% else %}
-    <!-- Estado vacío -->
+    <!-- Empty state -->
     <div class="empty-state">
         <div class="empty-state-icon">📁</div>
-        <h3 class="empty-state-title">No tienes colecciones aún</h3>
+        <h3 class="empty-state-title">You don't have any collections yet</h3>
         <p class="empty-state-description">
-            Las colecciones te ayudan a organizar tus tweets por temas,
-            proyectos o cualquier criterio que prefieras.
+            Collections help you organize your tweets by topics, projects or any
+            criteria you prefer.
         </p>
         <button
             onclick="openModal('createCollectionModal')"
             class="btn btn-primary"
         >
-            ➕ Crear mi primera colección
+            ➕ Create my first collection
         </button>
     </div>
     {% endif %}
 </div>
 
-<!-- Modal para crear colección -->
+<!-- Modal to create collection -->
 <div id="createCollectionModal" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 class="modal-title">➕ Nueva Colección</h2>
+            <h2 class="modal-title">➕ New Collection</h2>
             <button
                 onclick="closeModal('createCollectionModal')"
                 class="btn btn-secondary btn-sm"
@@ -118,14 +116,14 @@
             <form id="createCollectionForm">
                 <div class="form-group">
                     <label for="collectionName" class="label"
-                        >Nombre de la colección *</label
+                        >Collection name *</label
                     >
                     <input
                         type="text"
                         id="collectionName"
                         name="name"
                         class="input"
-                        placeholder="Ej: Marketing, Ideas, Proyectos..."
+                        placeholder="e.g.: Marketing, Ideas, Projects..."
                         required
                         maxlength="100"
                     />
@@ -133,13 +131,13 @@
 
                 <div class="form-group">
                     <label for="collectionDescription" class="label"
-                        >Descripción (opcional)</label
+                        >Description (optional)</label
                     >
                     <textarea
                         id="collectionDescription"
                         name="description"
                         class="textarea"
-                        placeholder="Describe el propósito de esta colección..."
+                        placeholder="Describe the purpose of this collection..."
                         maxlength="500"
                     ></textarea>
                 </div>
@@ -151,49 +149,47 @@
                 onclick="closeModal('createCollectionModal')"
                 class="btn btn-secondary"
             >
-                Cancelar
+                Cancel
             </button>
             <button
                 onclick="collectionManager.createCollection()"
                 class="btn btn-primary"
             >
-                ✅ Crear Colección
+                ✅ Create Collection
             </button>
         </div>
     </div>
 </div>
 
-<!-- Consejos -->
+<!-- Tips -->
 <div class="mt-8">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">
-                💡 Consejos para organizar tus colecciones
-            </h3>
+            <h3 class="card-title">💡 Tips for organizing your collections</h3>
         </div>
         <div class="card-content">
             <div
                 class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
             >
                 <div>
-                    <h4 class="font-medium text-gray-800 mb-2">📋 Por tema</h4>
+                    <h4 class="font-medium text-gray-800 mb-2">📋 By topic</h4>
                     <ul class="space-y-1">
-                        <li>• Marketing y promoción</li>
-                        <li>• Contenido educativo</li>
-                        <li>• Noticias del sector</li>
-                        <li>• Reflexiones personales</li>
+                        <li>• Marketing and promotion</li>
+                        <li>• Educational content</li>
+                        <li>• Industry news</li>
+                        <li>• Personal reflections</li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 class="font-medium text-gray-800 mb-2">
-                        🎯 Por propósito
+                        🎯 By purpose
                     </h4>
                     <ul class="space-y-1">
-                        <li>• Tweets programados</li>
-                        <li>• Borradores</li>
-                        <li>• Hilos populares</li>
-                        <li>• Colaboraciones</li>
+                        <li>• Scheduled tweets</li>
+                        <li>• Drafts</li>
+                        <li>• Popular threads</li>
+                        <li>• Collaborations</li>
                     </ul>
                 </div>
             </div>

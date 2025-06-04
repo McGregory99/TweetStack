@@ -1,18 +1,18 @@
-{% extends "base.html" %} {% block title %}Editor de Tweets - TweetStack{%
-endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}Tweet Editor - TweetStack{% endblock
+%} {% block content %}
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">
-        {% if tweet %}Editar Tweet{% else %}Nuevo Tweet{% endif %}
+        {% if tweet %}Edit Tweet{% else %}New Tweet{% endif %}
     </h1>
-    <a href="/" class="btn btn-secondary"> ← Volver al inicio </a>
+    <a href="/" class="btn btn-secondary"> ← Back to home </a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Editor principal -->
+    <!-- Main editor -->
     <div class="lg:col-span-2">
         <form id="tweetForm" class="card">
             <div class="card-content">
-                <!-- Toggle para hilo -->
+                <!-- Thread toggle -->
                 <div class="form-group">
                     <div class="checkbox-group">
                         <input
@@ -29,12 +29,12 @@ endblock %} {% block content %}
                             %}
                         />
                         <label for="threadToggle" class="label">
-                            🧵 Crear como hilo de tweets
+                            🧵 Create as tweet thread
                         </label>
                     </div>
                 </div>
 
-                <!-- Tweet simple -->
+                <!-- Single tweet -->
                 <div
                     id="singleTweetContainer"
                     {%
@@ -48,14 +48,12 @@ endblock %} {% block content %}
                     %}
                 >
                     <div class="form-group">
-                        <label for="content" class="label"
-                            >Contenido del Tweet</label
-                        >
+                        <label for="content" class="label">Tweet Content</label>
                         <textarea
                             id="content"
                             name="content"
                             class="textarea"
-                            placeholder="¿Qué está pasando?"
+                            placeholder="What's happening?"
                             maxlength="280"
                         >
 {% if tweet and not tweet.is_thread %}{{ tweet.content }}{% endif %}</textarea
@@ -67,20 +65,20 @@ endblock %} {% block content %}
 
                     <div class="form-group">
                         <label for="media_path" class="label"
-                            >Archivo multimedia (opcional)</label
+                            >Media file (optional)</label
                         >
                         <input
                             type="text"
                             id="media_path"
                             name="media_path"
                             class="input"
-                            placeholder="Ruta del archivo o URL"
+                            placeholder="File path or URL"
                             value="{% if tweet and not tweet.is_thread %}{{ tweet.media_path }}{% endif %}"
                         />
                     </div>
                 </div>
 
-                <!-- Container para hilos -->
+                <!-- Thread container -->
                 <div
                     id="threadContainer"
                     {%
@@ -96,9 +94,9 @@ endblock %} {% block content %}
                     %}
                 >
                     <div class="form-group">
-                        <label class="label">Tweets del hilo</label>
+                        <label class="label">Thread tweets</label>
                         <div id="threadTweetsContainer">
-                            <!-- Los tweets del hilo se generan dinámicamente -->
+                            <!-- Thread tweets are generated dynamically -->
                         </div>
                         <button
                             type="button"
@@ -106,15 +104,15 @@ endblock %} {% block content %}
                             class="btn btn-secondary mt-2"
                             style="display: none"
                         >
-                            ➕ Agregar tweet al hilo
+                            ➕ Add tweet to thread
                         </button>
                     </div>
                 </div>
 
-                <!-- Fecha programada -->
+                <!-- Scheduled date -->
                 <div class="form-group">
                     <label for="scheduled_date" class="label"
-                        >Programar para más tarde (opcional)</label
+                        >Schedule for later (optional)</label
                     >
                     <input
                         type="datetime-local"
@@ -125,32 +123,32 @@ endblock %} {% block content %}
                     />
                 </div>
 
-                <!-- Botones de acción -->
+                <!-- Action buttons -->
                 <div class="flex gap-2 mt-6">
                     <button
                         type="button"
                         id="saveTweet"
                         class="btn btn-primary"
                     >
-                        {% if tweet %}💾 Actualizar Tweet{% else %}📝 Guardar
-                        Tweet{% endif %}
+                        {% if tweet %}💾 Update Tweet{% else %}📝 Save Tweet{%
+                        endif %}
                     </button>
-                    <a href="/" class="btn btn-secondary"> ❌ Cancelar </a>
+                    <a href="/" class="btn btn-secondary"> ❌ Cancel </a>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Sidebar con colecciones -->
+    <!-- Sidebar with collections -->
     <div class="lg:col-span-1">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">📁 Colecciones</h3>
+                <h3 class="card-title">📁 Collections</h3>
             </div>
             <div class="card-content">
                 {% if collections %}
                 <p class="text-sm text-gray-600 mb-4">
-                    Selecciona las colecciones donde quieres guardar este tweet:
+                    Select the collections where you want to save this tweet:
                 </p>
 
                 {% for collection in collections %}
@@ -185,30 +183,26 @@ endblock %} {% block content %}
                 </div>
                 {% endfor %} {% else %}
                 <p class="text-sm text-gray-500 mb-4">
-                    No tienes colecciones aún.
+                    You don't have any collections yet.
                 </p>
                 <a href="/collections" class="btn btn-secondary btn-sm">
-                    ➕ Crear primera colección
+                    ➕ Create first collection
                 </a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Consejos -->
+        <!-- Tips -->
         <div class="card mt-4">
             <div class="card-header">
-                <h3 class="card-title">💡 Consejos</h3>
+                <h3 class="card-title">💡 Tips</h3>
             </div>
             <div class="card-content">
                 <ul class="text-sm text-gray-600 space-y-2">
-                    <li>• Los tweets tienen un límite de 280 caracteres</li>
-                    <li>• Los hilos te permiten contar historias más largas</li>
-                    <li>
-                        • Puedes programar tweets para publicarlos más tarde
-                    </li>
-                    <li>
-                        • Las colecciones te ayudan a organizar tu contenido
-                    </li>
+                    <li>• Tweets have a 280 character limit</li>
+                    <li>• Threads allow you to tell longer stories</li>
+                    <li>• You can schedule tweets to publish them later</li>
+                    <li>• Collections help you organize your content</li>
                 </ul>
             </div>
         </div>
@@ -241,8 +235,8 @@ endblock %} {% block content %}
 
                 // Show a helpful message
                 showNotification(
-                    "Fecha preseleccionada: " +
-                        new Date(formattedDate).toLocaleString("es-ES"),
+                    "Pre-selected date: " +
+                        new Date(formattedDate).toLocaleString("en-US"),
                     "info"
                 );
             }
@@ -257,7 +251,7 @@ endblock %} {% block content %}
                 if (window.tweetEditor) {
                     window.tweetEditor.toggleThread(true);
                 }
-                showNotification("Modo hilo activado", "info");
+                showNotification("Thread mode activated", "info");
             }
         }
 
@@ -265,7 +259,7 @@ endblock %} {% block content %}
         const duplicateId = urlParams.get("duplicate");
         if (duplicateId) {
             showNotification(
-                "Duplicando tweet... Los datos se cargarán automáticamente",
+                "Duplicating tweet... Data will be loaded automatically",
                 "info"
             );
         }

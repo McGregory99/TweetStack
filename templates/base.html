@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>
-            {% block title %}TweetStack - Organiza tus tweets{% endblock %}
+            {% block title %}TweetStack - Organize your tweets{% endblock %}
         </title>
 
         <!-- CSS -->
@@ -67,22 +67,22 @@
                             href="/"
                             class="nav-link {% if request.url.path == '/' %}active{% endif %}"
                         >
-                            🏠 Inicio
+                            🏠 Home
                         </a>
                         <a
                             href="/calendar"
                             class="nav-link {% if request.url.path == '/calendar' %}active{% endif %}"
                         >
-                            📅 Calendario
+                            📅 Calendar
                         </a>
                         <a
                             href="/collections"
                             class="nav-link {% if request.url.path == '/collections' %}active{% endif %}"
                         >
-                            📁 Colecciones
+                            📁 Collections
                         </a>
                         <a href="/editor" class="btn btn-primary">
-                            ✏️ Nuevo Tweet
+                            ✏️ New Post
                         </a>
                     </nav>
                 </div>
@@ -103,10 +103,7 @@
             "
         >
             <div class="container">
-                <p>
-                    &copy; 2024 TweetStack - Organiza tus tweets de manera
-                    eficiente
-                </p>
+                <p>&copy; 2024 TweetStack - Organize your tweets efficiently</p>
             </div>
         </footer>
 

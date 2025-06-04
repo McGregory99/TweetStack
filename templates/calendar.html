@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}Calendario - TweetStack{% endblock %}
+{% extends "base.html" %} {% block title %}Calendar - TweetStack{% endblock %}
 {% block extra_css %}
 <style>
     /* Calendar specific styles */
@@ -438,10 +438,10 @@
 </style>
 {% endblock %} {% block content %}
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">📅 Calendario de Tweets</h1>
+    <h1 class="text-2xl font-bold">📅 Tweet Calendar</h1>
     <div class="flex gap-2">
-        <a href="/editor" class="btn btn-primary"> ➕ Programar Tweet </a>
-        <a href="/" class="btn btn-secondary"> ← Volver al inicio </a>
+        <a href="/editor" class="btn btn-primary"> ➕ Schedule Tweet </a>
+        <a href="/" class="btn btn-secondary"> ← Back to home </a>
     </div>
 </div>
 
@@ -453,7 +453,7 @@
             href="/calendar?year={{ prev_month.year }}&month={{ prev_month.month }}"
             class="calendar-nav-btn"
         >
-            ← Anterior
+            ← Previous
         </a>
 
         <h2 class="text-xl font-bold">{{ month_name }} {{ current_year }}</h2>
@@ -462,14 +462,14 @@
             href="/calendar?year={{ next_month.year }}&month={{ next_month.month }}"
             class="calendar-nav-btn"
         >
-            Siguiente →
+            Next →
         </a>
     </div>
 
     <!-- Stats Bar -->
     <div class="calendar-stats">
         <div class="text-sm text-gray-600">
-            📊 <strong>{{ total_scheduled }}</strong> tweets programados en {{
+            📊 <strong>{{ total_scheduled }}</strong> scheduled tweets in {{
             month_name }}
         </div>
 
@@ -480,13 +480,13 @@
             </div>
             <div class="flex items-center gap-1">
                 <div class="w-3 h-3 bg-purple-500 rounded"></div>
-                <span>Hilos</span>
+                <span>Threads</span>
             </div>
             <div class="flex items-center gap-1">
                 <div
                     class="w-3 h-3 bg-blue-100 border border-blue-400 rounded"
                 ></div>
-                <span>Colecciones</span>
+                <span>Collections</span>
             </div>
         </div>
     </div>
@@ -494,13 +494,13 @@
     <!-- Calendar Grid -->
     <div class="calendar-grid">
         <!-- Weekday headers -->
-        <div class="calendar-weekday">Lun</div>
-        <div class="calendar-weekday">Mar</div>
-        <div class="calendar-weekday">Mié</div>
-        <div class="calendar-weekday">Jue</div>
-        <div class="calendar-weekday">Vie</div>
-        <div class="calendar-weekday">Sáb</div>
-        <div class="calendar-weekday">Dom</div>
+        <div class="calendar-weekday">Mon</div>
+        <div class="calendar-weekday">Tue</div>
+        <div class="calendar-weekday">Wed</div>
+        <div class="calendar-weekday">Thu</div>
+        <div class="calendar-weekday">Fri</div>
+        <div class="calendar-weekday">Sat</div>
+        <div class="calendar-weekday">Sun</div>
 
         <!-- Calendar days -->
         {% for week in calendar_days %} {% for day_data in week %} {% if
@@ -554,7 +554,7 @@
                 onclick="closeDayDetails()"
                 class="btn btn-secondary btn-sm"
             >
-                ✕ Cerrar
+                ✕ Close
             </button>
         </div>
 
@@ -571,14 +571,13 @@
 <div class="mt-8">
     <div class="empty-state">
         <div class="empty-state-icon">📅</div>
-        <h3 class="empty-state-title">No tienes tweets programados</h3>
+        <h3 class="empty-state-title">You don't have any scheduled tweets</h3>
         <p class="empty-state-description">
-            Usa el calendario para planificar y visualizar tu contenido futuro.
-            Programa tweets para días específicos y mantén una estrategia de
-            contenido organizada.
+            Use the calendar to plan and visualize your future content. Schedule
+            tweets for specific days and maintain an organized content strategy.
         </p>
         <a href="/editor" class="btn btn-primary">
-            📝 Programar mi primer tweet
+            📝 Schedule my first tweet
         </a>
     </div>
 </div>
@@ -588,33 +587,31 @@
 <div class="mt-8">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">💡 Consejos para el calendario</h3>
+            <h3 class="card-title">💡 Calendar tips</h3>
         </div>
         <div class="card-content">
             <div
                 class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
             >
                 <div>
-                    <h4 class="font-medium text-gray-800 mb-2">
-                        📋 Planificación
-                    </h4>
+                    <h4 class="font-medium text-gray-800 mb-2">📋 Planning</h4>
                     <ul class="space-y-1">
-                        <li>• Programa contenido con anticipación</li>
-                        <li>• Distribuye tweets a lo largo del día</li>
-                        <li>• Mantén consistencia en la frecuencia</li>
-                        <li>• Balancea diferentes tipos de contenido</li>
+                        <li>• Schedule content in advance</li>
+                        <li>• Distribute tweets throughout the day</li>
+                        <li>• Maintain consistency in frequency</li>
+                        <li>• Balance different types of content</li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 class="font-medium text-gray-800 mb-2">
-                        🎯 Organización
+                        🎯 Organization
                     </h4>
                     <ul class="space-y-1">
-                        <li>• Usa colecciones para agrupar por tema</li>
-                        <li>• Los hilos son ideales para contenido largo</li>
-                        <li>• Haz clic en cualquier día para ver detalles</li>
-                        <li>• Navega entre meses fácilmente</li>
+                        <li>• Use collections to group by topic</li>
+                        <li>• Threads are ideal for long content</li>
+                        <li>• Click on any day to see details</li>
+                        <li>• Navigate between months easily</li>
                     </ul>
                 </div>
             </div>
@@ -647,7 +644,7 @@
             console.error("=== ERROR in showDayDetailsFromElement ===");
             console.error("Error:", error);
             console.error("Stack:", error.stack);
-            alert("Error inesperado: " + error.message);
+            alert("Unexpected error: " + error.message);
         }
     }
 
@@ -655,36 +652,27 @@
         const modal = document.getElementById("dayDetailsModal");
         const title = document.getElementById("dayDetailsTitle");
         const content = document.getElementById("dayDetailsContent");
-        const statsContainer = document.getElementById("dayStatsContainer");
 
-        if (!modal || !title || !content || !statsContainer) {
+        if (!modal || !title || !content) {
             console.error("Modal elements not found");
             return;
         }
 
-        // Format date
-        const date = new Date(dateStr + "T00:00:00");
-        const formattedDate = date.toLocaleDateString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-
-        title.textContent = formattedDate;
-
-        statsContainer.innerHTML = "";
-
+        title.textContent = "📅 " + formatDateForDisplay(dateStr);
         content.innerHTML = `
             <div style="text-align: center; padding: 2rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
-                <h3 style="color: #666; margin-bottom: 1rem;">Día libre</h3>
-                <p style="color: #888;">No tienes tweets programados para esta fecha.</p>
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                <h4 style="color: #374151; margin-bottom: 0.5rem;">No scheduled tweets</h4>
+                <p style="color: #888;">You don't have any scheduled tweets for this date.</p>
+                <div style="margin-top: 1.5rem;">
+                    <a href="/editor?scheduled_date=${dateStr}T12:00" class="btn btn-primary">
+                        📅 Schedule a tweet for this day
+                    </a>
+                </div>
             </div>
         `;
 
         modal.style.display = "flex";
-        document.body.style.overflow = "hidden";
     }
 
     function fetchTweetsForDay(dateStr) {
@@ -706,7 +694,7 @@
                 console.error("=== ERROR in fetchTweetsForDay ===");
                 console.error("Error:", error);
                 console.error("Stack:", error.stack);
-                alert("Error: No se pudieron cargar los tweets del día");
+                alert("Error: Could not load tweets for the day");
             });
     }
 
@@ -718,155 +706,141 @@
         const modal = document.getElementById("dayDetailsModal");
         const title = document.getElementById("dayDetailsTitle");
         const content = document.getElementById("dayDetailsContent");
-        const statsContainer = document.getElementById("dayStatsContainer");
 
-        if (!modal || !title || !content || !statsContainer) {
+        if (!modal || !title || !content) {
             console.error("Modal elements not found");
-            alert("Error: Elementos del modal no encontrados");
+            alert("Error: Modal elements not found");
             return;
         }
 
-        // Format date
-        const date = new Date(dateStr + "T00:00:00");
-        const formattedDate = date.toLocaleDateString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+        title.textContent = "📅 " + formatDateForDisplay(dateStr);
 
-        title.textContent = formattedDate;
-
-        statsContainer.innerHTML = "";
-
-        // Generate content with individual character counts
         let html = "";
-        tweets.forEach((tweet, index) => {
-            const time = tweet.scheduled_date
-                ? new Date(tweet.scheduled_date).toLocaleTimeString("es-ES", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                  })
-                : "Sin hora";
+        let totalChars = 0;
+        let totalTweets = 0;
 
-            // Calculate individual tweet character count
+        tweets.forEach((tweet, index) => {
             let tweetChars = 0;
             let tweetCount = 1;
 
+            if (tweet.content) {
+                tweetChars += tweet.content.length;
+            }
+
             if (tweet.is_thread && tweet.thread_tweets) {
                 tweetChars = tweet.thread_tweets.reduce(
-                    (sum, t) => sum + (t.content || "").length,
+                    (sum, t) => sum + (t.content ? t.content.length : 0),
                     0
                 );
                 tweetCount = tweet.thread_tweets.length;
-            } else {
-                tweetChars = (tweet.content || "").length;
             }
 
-            const avgCharsThisTweet = Math.round(tweetChars / tweetCount);
+            totalChars += tweetChars;
+            totalTweets += tweetCount;
+
+            // Format scheduled time
+            const scheduledTime = tweet.scheduled_date
+                ? new Date(tweet.scheduled_date).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                  })
+                : "No time set";
 
             html +=
-                '<div class="day-tweet" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">';
+                '<div style="border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; background: #f9fafb;">';
+
             html +=
-                '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">';
-            html += '<div style="font-weight: 600; color: #1e293b;">🕐 ' + time;
+                '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">';
+            html += "<div><strong>⏰ " + scheduledTime + "</strong>";
 
             if (tweet.is_thread) {
-                html += " - 🧵 Hilo (" + tweetCount + " tweets)";
-            } else {
-                html += " - 📝 Tweet simple";
+                html += " - 🧵 Thread (" + tweetCount + " tweets)";
             }
 
             html += "</div>";
 
-            // Character count badge
+            // Add actions
             html +=
-                '<div style="background: #f1f5f9; color: #475569; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">';
-            html += tweetChars + " caracteres";
-            if (tweet.is_thread) {
-                html += " (" + avgCharsThisTweet + "/tweet)";
-            }
-            html += "</div>";
+                '<div style="display: flex; gap: 0.5rem;">' +
+                '<a href="/editor?tweet_id=' +
+                tweet.id +
+                '" style="padding: 0.25rem 0.75rem; background: #3b82f6; color: white; border-radius: 0.25rem; text-decoration: none; font-size: 0.875rem;">✏️ Edit</a>' +
+                "</div>";
+
             html += "</div>";
 
-            if (
-                tweet.is_thread &&
-                tweet.thread_tweets &&
-                tweet.thread_tweets.length > 0
-            ) {
-                html +=
-                    '<div style="background: #f8f4ff; padding: 0.75rem; border-radius: 0.25rem; border-left: 4px solid #8b5cf6;">';
-                html +=
-                    '<div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.5rem;">Hilo de ' +
-                    tweet.thread_tweets.length +
-                    " tweets:</div>";
-                tweet.thread_tweets.forEach((t, i) => {
-                    const threadTweetChars = (t.content || "").length;
+            // Tweet content
+            if (tweet.is_thread && tweet.thread_tweets) {
+                if (tweet.thread_tweets && tweet.thread_tweets.length > 0) {
                     html +=
-                        '<div style="margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 0.25rem;">';
+                        '<div style="background: #f3e8ff; border-left: 4px solid #8b5cf6; padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; margin: 1rem 0;">';
                     html +=
-                        '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">';
-                    html +=
-                        '<strong style="color: #8b5cf6; font-size: 0.875rem;">Tweet ' +
-                        (i + 1) +
-                        ":</strong>";
-                    html +=
-                        '<span style="color: #6b7280; font-size: 0.75rem;">' +
-                        threadTweetChars +
-                        " chars</span>";
+                        '<div style="color: #8b5cf6; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem;">🧵 Thread with ' +
+                        tweet.thread_tweets.length +
+                        " tweets:</div>";
+                    tweet.thread_tweets.forEach((t, i) => {
+                        html +=
+                            '<div style="padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">';
+                        html +=
+                            '<div style="color: #8b5cf6; font-size: 0.75rem; margin-bottom: 0.25rem;">Tweet ' +
+                            (i + 1) +
+                            "</div>";
+                        html +=
+                            '<div style="color: #374151;">' +
+                            (t.content || "") +
+                            "</div>";
+                        if (t.media_path) {
+                            html +=
+                                '<div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">📎 ' +
+                                t.media_path +
+                                "</div>";
+                        }
+                        html += "</div>";
+                    });
                     html += "</div>";
-                    html +=
-                        '<div style="color: #374151;">' +
-                        (t.content || "").substring(0, 120);
-                    if ((t.content || "").length > 120) html += "...";
-                    html += "</div>";
-                    html += "</div>";
-                });
-                html += "</div>";
+                }
             } else {
-                const content = (tweet.content || "").substring(0, 200);
                 html +=
-                    '<div style="color: #374151; margin-bottom: 0.5rem;">' +
-                    content;
-                if ((tweet.content || "").length > 200) html += "...";
-                html += "</div>";
+                    '<div style="color: #374151; margin: 1rem 0;">' +
+                    (tweet.content || "") +
+                    "</div>";
+                if (tweet.media_path) {
+                    html +=
+                        '<div style="font-size: 0.75rem; color: #6b7280;">📎 ' +
+                        tweet.media_path +
+                        "</div>";
+                }
             }
 
+            // Collections
             if (tweet.collections && tweet.collections.length > 0) {
-                html += '<div style="margin-top: 0.5rem;">';
-                tweet.collections.forEach((c) => {
+                html += '<div style="margin-top: 1rem;">';
+                tweet.collections.forEach((collection) => {
                     html +=
                         '<span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-right: 0.5rem;">📁 ' +
-                        (c.name || "") +
+                        collection.name +
                         "</span>";
                 });
                 html += "</div>";
             }
 
+            // Delete button
             html +=
-                '<div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">';
-            html +=
-                '<a href="/editor?tweet_id=' +
-                tweet.id +
-                '" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem;">✏️ Editar</a>';
-            html +=
+                '<div style="margin-top: 1rem; text-align: right;">' +
                 '<button onclick="deleteTweetSimple(' +
                 tweet.id +
-                ')" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; font-size: 0.875rem; cursor: pointer;">🗑️ Eliminar</button>';
-            html += "</div>";
+                ')" style="padding: 0.25rem 0.75rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; font-size: 0.875rem; cursor: pointer;">🗑️ Delete</button>' +
+                "</div>";
 
             html += "</div>";
         });
 
         content.innerHTML = html;
         modal.style.display = "flex";
-        document.body.style.overflow = "hidden";
-
-        console.log("Modal should be visible now");
     }
 
     function deleteTweetSimple(tweetId) {
-        if (confirm("¿Eliminar este tweet?")) {
+        if (confirm("Are you sure you want to delete this tweet?")) {
             fetch("/api/tweets/" + tweetId, { method: "DELETE" })
                 .then(() => location.reload())
                 .catch((error) => alert("Error: " + error.message));
