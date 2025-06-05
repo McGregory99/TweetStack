@@ -620,6 +620,22 @@
 </div>
 {% endblock %} {% block extra_js %}
 <script>
+    // Date formatting utility function
+    function formatDateForDisplay(dateStr) {
+        try {
+            const date = new Date(dateStr + "T00:00:00");
+            return date.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+        } catch (error) {
+            console.error("Error formatting date:", error);
+            return dateStr; // fallback to original string
+        }
+    }
+
     // Simple debugging version
     function showDayDetailsFromElement(element) {
         console.log("=== DEBUG: Click detected ===");
@@ -679,14 +695,22 @@
         console.log("=== Fetching tweets for day ===");
         console.log("Date:", dateStr);
 
-        fetch("/api/tweets/day?date=" + dateStr)
-            .then((response) => response.json())
+        fetch("/api/tweets/day?date=" + encodeURIComponent(dateStr))
+            .then((response) => {
+                console.log("Response status:", response.status);
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP ${response.status}: ${response.statusText}`
+                    );
+                }
+                return response.json();
+            })
             .then((data) => {
                 console.log("Tweets data received:", data);
-                if (data.tweets && data.tweets.length > 0) {
+                if (data && data.tweets && data.tweets.length > 0) {
                     showSimpleDayDetails(dateStr, data.tweets);
                 } else {
-                    console.log("Empty tweets array");
+                    console.log("Empty tweets array or invalid data");
                     showEmptyDayModal(dateStr);
                 }
             })
@@ -694,7 +718,19 @@
                 console.error("=== ERROR in fetchTweetsForDay ===");
                 console.error("Error:", error);
                 console.error("Stack:", error.stack);
-                alert("Error: Could not load tweets for the day");
+
+                // More specific error handling
+                let errorMessage = "Could not load tweets for the day";
+                if (error.message.includes("HTTP 404")) {
+                    errorMessage = "No tweets found for this date";
+                } else if (error.message.includes("HTTP 500")) {
+                    errorMessage = "Server error occurred";
+                } else if (error.name === "TypeError") {
+                    errorMessage =
+                        "Network error - please check your connection";
+                }
+
+                alert("Error: " + errorMessage);
             });
     }
 

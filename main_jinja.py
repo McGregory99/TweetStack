@@ -234,20 +234,34 @@ def format_collection_response(collection: Collection, db: Session) -> dict:
 # HTML ROUTES (Jinja2 Templates)
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, db: Session = Depends(get_db)):
-    """Main page with all tweets"""
+def home(request: Request, collection: Optional[int] = None, db: Session = Depends(get_db)):
+    """Main page with all tweets, optionally filtered by collection"""
     user_id = DEMO_USER_ID  # Using demo user for development
     
-    tweets = db.query(Tweet).filter(Tweet.user_id == user_id).order_by(Tweet.created_at.desc()).all()
+    # Get tweets query
+    tweets_query = db.query(Tweet).filter(Tweet.user_id == user_id)
+    
+    # Filter by collection if provided
+    current_collection = None
+    if collection:
+        current_collection = db.query(Collection).filter(
+            Collection.id == collection, 
+            Collection.user_id == user_id
+        ).first()
+        if current_collection:
+            tweets_query = tweets_query.filter(Tweet.collections.any(Collection.id == collection))
+    
+    tweets = tweets_query.order_by(Tweet.created_at.desc()).all()
     collections = db.query(Collection).filter(Collection.user_id == user_id).order_by(Collection.name).all()
     
     tweets_data = [format_tweet_response(tweet, db) for tweet in tweets]
-    collections_data = [format_collection_response(collection, db) for collection in collections]
+    collections_data = [format_collection_response(collection_obj, db) for collection_obj in collections]
     
     return templates.TemplateResponse("index.html", {
         "request": request,
         "tweets": tweets_data,
         "collections": collections_data,
+        "current_collection": current_collection,
         "user_id": user_id
     })
 
@@ -358,6 +372,41 @@ def calendar_view(request: Request, year: Optional[int] = None, month: Optional[
         "prev_month": prev_month,
         "next_month": next_month,
         "total_scheduled": len(scheduled_tweets),
+        "user_id": user_id
+    })
+
+@app.get("/collection/{collection_id}", response_class=HTMLResponse)
+def collection_view(request: Request, collection_id: int, db: Session = Depends(get_db)):
+    """Dedicated view for a specific collection's posts"""
+    user_id = DEMO_USER_ID
+    
+    # Get the collection
+    collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == user_id
+    ).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Get tweets for this collection
+    tweets = db.query(Tweet).filter(
+        Tweet.user_id == user_id,
+        Tweet.collections.any(Collection.id == collection_id)
+    ).order_by(Tweet.created_at.desc()).all()
+    
+    # Get all collections for sidebar/navigation
+    all_collections = db.query(Collection).filter(Collection.user_id == user_id).order_by(Collection.name).all()
+    
+    tweets_data = [format_tweet_response(tweet, db) for tweet in tweets]
+    collections_data = [format_collection_response(collection_obj, db) for collection_obj in all_collections]
+    collection_data = format_collection_response(collection, db)
+    
+    return templates.TemplateResponse("collection_view.html", {
+        "request": request,
+        "tweets": tweets_data,
+        "collection": collection_data,
+        "collections": collections_data,
         "user_id": user_id
     })
 
